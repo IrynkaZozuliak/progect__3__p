@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ловець метеликів</title>
+    <style>
+        body {
+            background-color: lightgray;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        
+        #game-board {
+            width: 500px;
+            height: 400px;
+            background-color: lightgreen;
+            position: relative;
+        }
+        
+        .butterfly {
+            position: absolute;
+            cursor: pointer;
+        }
+        
+        #scoreboard {
+            margin-top: 20px;
+        }
+        
+        #timer {
+            margin-top: 20px;
+        }
+        
+        #records {
+            margin-top: 20px;
+        }
+        
+        #end-button, #start-button {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-board"></div>
+    <div id="scoreboard">Зловлено метеликів: <span id="score">0</span></div>
+    <div id="timer">Час: <span id="time">0</span> сек</div>
+    <div id="records">
+        Рекорд: <span id="record">0</span> метеликів
+        <table id="game-table">
+            <tr>
+                <th>Гра</th>
+                <th>Метелики</th>
+            </tr>
+        </table>
+    </div>
+    <button id="end-button" disabled>Завершити гру</button>
+    <button id="start-button">Розпочати гру</button>
+    
+    <script>
+        var gameBoard = document.getElementById("game-board");
+        var scoreDisplay = document.getElementById("score");
+        var timeDisplay = document.getElementById("time");
+        var recordDisplay = document.getElementById("record");
+        var table = document.getElementById("game-table");
+        var endButton = document.getElementById("end-button");
+        var startButton = document.getElementById("start-button");
+        
+        var butterfliesCaught = 0;
+        var timer = 0;
+        var intervalId;
+        
+        function createButterfly() {
+            var butterfly = document.createElement("div");
+            butterfly.className = "butterfly";
+            
+            var colors = ["red", "blue", "yellow", "purple"];
+            var randomColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            butterfly.style.backgroundColor = randomColor;
+            
+            var size = Math.floor(Math.random() * 50) + 20;
+            butterfly.style.width = size + "px";
+            butterfly.style.height = size + "px";
+            
+            var maxX = gameBoard.clientWidth - size;
+            var maxY = gameBoard.clientHeight - size;
+            
+            var randomX = Math.floor(Math.random() * maxX);
+            var randomY = Math.floor(Math.random() * maxY);
+            
+            butterfly.style.left = randomX + "px";
+            butterfly.style.top = randomY + "px";
+            
+            butterfly.addEventListener("click", function() {
+                butterfliesCaught++;
+                scoreDisplay.textContent = butterfliesCaught;
+                gameBoard.removeChild(butterfly);
+            });
+            
+            gameBoard.appendChild(butterfly);
+        }
+        
+        function startGame() {
+            startButton.disabled = true;
+            endButton.disabled = false;
+            
+            intervalId = setInterval(function() {
+                timer++;
+                timeDisplay.textContent = timer;
+            }, 1000);
+            
+            intervalId = setInterval(function() {
+                if (timer >= 30) {
+                    clearInterval(intervalId);
+                    endGame();
+                } else {
+                    createButterfly();
+                }
+            }, 1000);
+        }
+        
+        function endGame() {
+            clearInterval(intervalId);
+            startButton.disabled = false;
+            endButton.disabled = true;
+            
+            if (butterfliesCaught > parseInt(recordDisplay.textContent)) {
+                recordDisplay.textContent = butterfliesCaught;
+            }
+            
+            var gameRow = document.createElement("tr");
+            var gameData = document.createElement("td");
+            gameData.textContent = "Гра " + (table.rows.length);
+            gameRow.appendChild(gameData);
+            var butterfliesData = document.createElement("td");
+            butterfliesData.textContent = butterfliesCaught;
+            gameRow.appendChild(butterfliesData);
+            
+            table.appendChild(gameRow);
+            
+            butterfliesCaught = 0;
+            timer = 0;
+            scoreDisplay.textContent = butterfliesCaught;
+            timeDisplay.textContent = timer;
+            
+            var butterflies = document.getElementsByClassName("butterfly");
+            while (butterflies.length > 0) {
+                butterflies[0].parentNode.removeChild(butterflies[0]);
+            }
+        }
+        
+        startButton.addEventListener("click", function() {
+            startGame();
+        });
+        
+        endButton.addEventListener("click", function() {
+            endGame();
+        });
+    </script>
+</body>
+</html>
